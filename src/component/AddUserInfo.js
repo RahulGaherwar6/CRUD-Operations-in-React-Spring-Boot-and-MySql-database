@@ -1,14 +1,13 @@
 import React, { useState } from "react";
 import axios from "axios";
 import "./AddUserInfo.css";
-import { Navigate, useNavigate } from "react-router-dom";
-
+import { useNavigate } from "react-router-dom";
 
 function AddUserInfo() {
-  
   const navigate = useNavigate();
-
-
+  const [showError, setShowError] = useState(true);
+ // const [ButtonPresent, setButtonPresent] = useState(true);
+   
   const [data, setData] = useState({
     rollno: null,
     marks: null,
@@ -21,14 +20,21 @@ function AddUserInfo() {
       ...data,
       [name]: value,
     });
-    console.log(data);
   }
 
   function handleSubmit(e) {
     e.preventDefault();
+
     axios
       .post("http://localhost:8080/save", data)
-      .then((res) => console.log(res))
+      .then((res) => {
+        if (res.data === "") {
+          setShowError(false);
+        } else {
+          setShowError(true);
+          navigate("/ShowInfo");
+        }
+      })
       .catch((err) => console.log(err));
 
     setData({
@@ -36,12 +42,9 @@ function AddUserInfo() {
       marks: 0,
       name: "",
     });
- 
-     navigate("/ShowInfo");
-
   }
-
-  
+ const checkData = data.rollno && data.marks && data.name ;
+    
   return (
     <>
       <div className="container mt-5 d-flex justify-content-center">
@@ -88,11 +91,18 @@ function AddUserInfo() {
               />
             </div>
 
-            <button type="submit" class="btn btn-primary">
+            <button
+              type="submit"
+              class="btn btn-primary"
+              disabled={!checkData}
+            >
               Submit
             </button>
           </form>
         </div>
+      </div>
+      <div className="para mt-4 text-danger">
+        { !showError ? <p>This id is already present </p> : <p></p>}
       </div>
     </>
   );
